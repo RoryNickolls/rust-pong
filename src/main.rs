@@ -19,21 +19,35 @@ use update::Update;
 pub mod paddle;
 use paddle::Paddle;
 
+pub mod bounds;
+
 struct GameLoop {
     display: glium::Display,
     elapsed_time: f32,
     delta_time: f32,
     running: bool,
-    player_paddle: Paddle,
-    enemy_paddle: Paddle,
-    ball: Ball,
+}
+
+struct RigidbodySystem<R: Rigidbody> {
+    actors: Vec<Box<R>>,
+}
+
+impl<R> Update for RigidbodySystem<R>
+    where R: Rigidbody + Render + Update {
+        
+    fn update(&mut self, delta_time: f32) {
+        for actor in self.actors {
+            let a = *actor;
+            a.update(delta_time);
+        }
+    }
 }
 
 impl GameLoop {
     fn new(display: glium::Display) -> GameLoop {
         let mut player_paddle = Paddle::new();
-        player_paddle.rigidbody.transform.position = Vector::new(-0.95, 1.0, 0.0);
-        player_paddle.rigidbody.transform.scale = Vector::new(0.1, 0.1, 0.1);
+        player_paddle.transform.position = Vector::new(-0.95, 1.0, 0.0);
+        player_paddle.transform.scale = Vector::new(0.1, 0.1, 0.1);
 
         let mut enemy_paddle = Paddle::new();
         enemy_paddle.rigidbody.transform.position = Vector::new(0.95, 0.0, 0.0);

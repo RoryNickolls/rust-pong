@@ -1,37 +1,51 @@
 use crate::rigidbody::Rigidbody;
 use crate::render::{Render, Vertex};
 use crate::update::Update;
+use crate::transform::Transform;
 use crate::vector::Vector;
+use crate::bounds::Bounds;
 
 pub struct Ball {
-    pub rigidbody: Rigidbody,
+    pub transform: Transform,
+    pub velocity: Vector,
     pub in_play: bool,
 }
 
 impl Ball {
     pub fn new() -> Ball {
-        let mut rigidbody = Rigidbody::new();
-        rigidbody.transform.scale = Vector::new(0.1, 0.1, 0.1);
+        Ball { transform: Transform::new(), velocity: Vector::zero(), in_play: true, }
+    }
+}
 
-        Ball { rigidbody: rigidbody, in_play: true, }
+impl Rigidbody for Ball {
+    fn transform(&self) -> &Transform {
+        &self.transform
+    }
+
+    fn velocity(&self) -> &Vector {
+        &self.velocity
+    }
+
+    fn bounds(&self) -> Bounds {
+        Bounds::new(self.transform.position, Vector::zero())
+    }
+
+    fn on_collide<R: Rigidbody>(&mut self, other: Box<R>) {
+
     }
 }
 
 impl Update for Ball {
     fn update(&mut self, delta_time: f32) {
-        if self.in_play {
-            self.rigidbody.update(delta_time);
-        }
-
-        if self.rigidbody.transform.position.y <= -1.0 {
-            self.rigidbody.transform.position.y = 1.0;
+        if self.transform.position.y <= -1.0 {
+            self.transform.position.y = 1.0;
         }
     }
 }
 
 impl Render for Ball {
     fn model_matrix(&self) -> [[f32; 4]; 4] {
-        self.rigidbody.transform.transform_matrix()
+        self.transform.transform_matrix()
     }
 
     fn vertices() -> Vec<Vertex> {
