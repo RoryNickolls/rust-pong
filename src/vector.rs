@@ -1,6 +1,9 @@
 use std::ops::Add;
+use std::ops::AddAssign;
 use std::ops::Sub;
+use std::ops::SubAssign;
 use std::ops::Neg;
+use std::ops::Mul;
 
 #[derive(Clone, Copy)]
 pub struct Vector {
@@ -39,6 +42,15 @@ impl Add for Vector {
     }
 }
 
+impl AddAssign for Vector {
+
+    fn add_assign(&mut self, other: Vector) {
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
+    }
+}
+
 impl Sub for Vector {
     type Output = Vector;
 
@@ -51,6 +63,15 @@ impl Sub for Vector {
     }
 }
 
+impl SubAssign for Vector {
+
+    fn sub_assign(&mut self, other: Vector) {
+        self.x -= other.x;
+        self.y -= other.y;
+        self.z -= other.z;
+    }
+}
+
 impl Neg for Vector {
     type Output = Vector;
 
@@ -59,6 +80,18 @@ impl Neg for Vector {
             x: -self.x,
             y: -self.y,
             z: -self.z,
+        }
+    }
+}
+
+impl Mul<f32> for Vector {
+    type Output = Vector;
+
+    fn mul(self, other: f32) -> Vector {
+        Vector {
+            x: self.x * other,
+            y: self.y * other,
+            z: self.z * other,
         }
     }
 }

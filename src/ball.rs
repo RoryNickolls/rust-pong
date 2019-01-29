@@ -1,64 +1,37 @@
 use crate::rigidbody::Rigidbody;
-use crate::render::{Render, Vertex};
-use crate::update::Update;
+use crate::render::{Vertex, Renderable};
 use crate::transform::Transform;
 use crate::vector::Vector;
 use crate::bounds::Bounds;
+use crate::ecs::Entity;
 
 pub struct Ball {
-    pub transform: Transform,
-    pub velocity: Vector,
-    pub in_play: bool,
+    rigidbody: Rigidbody,
+    renderable: Renderable,
+    in_play: bool,
 }
 
 impl Ball {
     pub fn new() -> Ball {
-        Ball { transform: Transform::new(), velocity: Vector::zero(), in_play: true, }
-    }
-}
-
-impl Rigidbody for Ball {
-    fn transform(&self) -> &Transform {
-        &self.transform
-    }
-
-    fn velocity(&self) -> &Vector {
-        &self.velocity
-    }
-
-    fn bounds(&self) -> Bounds {
-        Bounds::new(self.transform.position, Vector::zero())
-    }
-
-    fn on_collide<R: Rigidbody>(&mut self, other: Box<R>) {
-
-    }
-}
-
-impl Update for Ball {
-    fn update(&mut self, delta_time: f32) {
-        if self.transform.position.y <= -1.0 {
-            self.transform.position.y = 1.0;
-        }
-    }
-}
-
-impl Render for Ball {
-    fn model_matrix(&self) -> [[f32; 4]; 4] {
-        self.transform.transform_matrix()
-    }
-
-    fn vertices() -> Vec<Vertex> {
-        vec!
-        [
+        let rigidbody = Rigidbody::new(Transform::new(), Vector::zero(), Bounds::new(Vector::zero(), Vector::zero()));
+        let vertices = vec![
             Vertex { position: [ -0.2,  0.2, 0.0 ] },
             Vertex { position: [  0.2,  0.2, 0.0 ] },
             Vertex { position: [ -0.2, -0.2, 0.0 ] },
             Vertex { position: [  0.2, -0.2, 0.0 ] },
-        ]
+        ];
+        let renderable = Renderable::new(rigidbody.transform().transform_matrix(), vertices);
+        Ball { rigidbody: rigidbody, renderable: renderable, in_play: true, }
+    }
+}
+
+impl Entity for Ball {
+    fn rigidbody(&mut self) -> Option<&mut Rigidbody> {
+        Some(&mut self.rigidbody)
     }
 
-    fn vertex_buffer(display: &glium::Display) -> glium::VertexBuffer<Vertex> {
-        glium::VertexBuffer::new(display, &Ball::vertices().as_slice()).unwrap()
+    fn renderable(&mut self) -> Option<&mut Renderable> {
+        self.renderable.set_model_matrix(self.rigidbody.transform().transform_matrix());
+        Some(&mut self.renderable)
     }
 }
