@@ -1,10 +1,12 @@
 use crate::rigidbody::Rigidbody;
 use crate::render::{GlobalRenderParameters, FrameRenderParameters, Renderable};
 use glium::{uniform, Surface, Frame, Display};
+use glium::glutin;
 
 pub trait Entity {
     fn rigidbody(&mut self) -> Option<&mut Rigidbody>;
     fn renderable(&mut self) -> Option<&mut Renderable>;
+    fn process_input_event(&mut self, event: &glutin::Event);
 }
 
 pub struct EntityComponentSystem {
@@ -17,7 +19,7 @@ impl EntityComponentSystem {
         EntityComponentSystem { global_render_parameters: global_render_parameters, entities: vec![] }
     }
 
-    pub fn update(&mut self, delta_time: f32) {
+    pub fn update(&mut self, delta_time: f32, events: Vec<glutin::Event>) {
         let mut target = self.global_render_parameters.display().draw();
         let view = {
             let (width, height) = target.get_dimensions();
@@ -39,6 +41,10 @@ impl EntityComponentSystem {
 
             if let Some(rigidbody) = entity.rigidbody() {
                 EntityComponentSystem::process_rigidbody(delta_time, rigidbody);
+            }
+
+            for event in &events {
+                entity.process_input_event(event);
             }
         }
         frame_render_parameters.finish_frame();

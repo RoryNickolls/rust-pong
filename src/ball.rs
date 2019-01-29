@@ -4,6 +4,7 @@ use crate::transform::Transform;
 use crate::vector::Vector;
 use crate::bounds::Bounds;
 use crate::ecs::Entity;
+use glium::glutin;
 
 pub struct Ball {
     rigidbody: Rigidbody,
@@ -33,5 +34,9 @@ impl Entity for Ball {
     fn renderable(&mut self) -> Option<&mut Renderable> {
         self.renderable.set_model_matrix(self.rigidbody.transform().transform_matrix());
         Some(&mut self.renderable)
+    }
+
+    fn process_input_event(&mut self, event: &glutin::Event) {
+
     }
 }
